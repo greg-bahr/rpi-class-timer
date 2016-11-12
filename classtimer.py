@@ -11,7 +11,7 @@ import httplib2
 import os
 import time
 import datetime
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 from apiclient import discovery
 from oauth2client import client
@@ -21,7 +21,9 @@ from ConfigParser import SafeConfigParser
 
 try:
     import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+    flags = argparse.ArgumentParser(parents=[tools.argparser])
+    flags.add_argument("--calendarid")
+    args = flags.parse_args()
 except ImportError:
     flags = None
 
@@ -29,6 +31,7 @@ SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'RPI Class Timer'
 pin = 24
+calendarid = args.calendarid if args.calendarid else 'primary'
 
 def load_schedules():
     config = SafeConfigParser()
@@ -76,7 +79,7 @@ def get_current_schedule(service):
     schedule = {}
 
     events = service.events().list(
-        calendarId='primary', timeMin=today, timeMax=tommorrow, singleEvents=True,
+        calendarId=calendarid, timeMin=today, timeMax=tommorrow, singleEvents=True,
         orderBy='startTime').execute()
 
     print("Listing events on " + today[0:10] + ".\n")
@@ -89,18 +92,18 @@ def get_current_schedule(service):
                 schedule.append(schedules[event['summary']][hour])
     return schedule
 
-def setup_GPIO():
+"""def setup_GPIO():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
+    GPIO.output(pin, GPIO.LOW)"""
 
 def main():
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http)
     tommorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-    setup_GPIO()
+    #setup_GPIO()
 
     schedule = get_current_schedule(service)
     if not schedule:
@@ -114,10 +117,10 @@ def main():
         for classend in schedule:
             if (classend - datetime.timedelta(minutes=8)) == current_time:
                 print("\n" + "Flashing Light.")
-                GPIO.output(pin, GPIO.HIGH)
+                #GPIO.output(pin, GPIO.HIGH)
                 time.sleep(480)
                 print("Light off.")
-                GPIO.output(pin, GPIO.LOW)
+                #GPIO.output(pin, GPIO.LOW)
 
         time.sleep(10)
     main()
