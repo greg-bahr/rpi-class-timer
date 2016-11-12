@@ -30,7 +30,7 @@ except ImportError:
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'RPI Class Timer'
-pin = 24
+pin = 3
 calendarid = args.calendarid if args.calendarid else 'primary'
 
 def load_schedules():
