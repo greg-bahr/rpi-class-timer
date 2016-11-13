@@ -43,7 +43,7 @@ def load_schedules():
         schedules[section] = {}
         for (key, val) in config.items(section):
             schedules[section][key] = datetime.datetime.now().replace(hour=int("{:0>2}".format(val.split(":")[0])), minute=int(val.split(":")[1]), second=0, microsecond=0)
-    print("Schedules loaded.\n")
+    print("Schedules loaded.")
     return schedules
 
 def get_credentials():
@@ -83,7 +83,7 @@ def get_current_schedule(service):
     events = service.events().list(
         calendarId=calendarid, timeMin=today, timeMax=tommorrow, singleEvents=True,
         orderBy='startTime').execute()
-
+    print("*"+"-"*50+"*")
     print("Listing events on " + today[0:10] + ".\n")
     for event in events['items']:
         start = event['start'].get('dateTime', event['start'].get('date'))
@@ -92,6 +92,7 @@ def get_current_schedule(service):
             schedule = []
             for hour in schedules[event['summary']]:
                 schedule.append(schedules[event['summary']][hour])
+    print("*"+"-"*50+"*")
     return schedule
 
 def setup_GPIO():
@@ -108,10 +109,9 @@ def main():
     setup_GPIO()
 
     schedule = get_current_schedule(service)
-    if not schedule:
-        print("No event matches a schedule. Will look again.\n")
+    while not schedule:
+        print("No event matches a schedule. Will look again.")
         time.sleep(5)
-        main()
     print("\nSetting today's schedule to ", schedule)
     while datetime.date.today().strftime('%Y-%m-%d') != tommorrow:
         print("\n",datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ";", "Checking time.")
@@ -125,6 +125,7 @@ def main():
                 GPIO.output(pin, GPIO.LOW)
 
         time.sleep(10)
+    print("New day, looking for a new schedule.")
     main()
 
 if __name__ == '__main__':
