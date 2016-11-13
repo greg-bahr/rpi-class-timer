@@ -23,6 +23,7 @@ try:
     import argparse
     flags = argparse.ArgumentParser(parents=[tools.argparser])
     flags.add_argument("--calendarid")
+    flags.add_argument("--outputpin", type=int)
     args = flags.parse_args()
 except ImportError:
     flags = None
@@ -30,8 +31,9 @@ except ImportError:
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'RPI Class Timer'
-pin = 3
+pin = args.outputpin if args.outputpin else 3
 calendarid = args.calendarid if args.calendarid else 'primary'
+print("Using BCM pin",pin,"for output.")
 
 def load_schedules():
     config = SafeConfigParser()
@@ -107,7 +109,7 @@ def main():
 
     schedule = get_current_schedule(service)
     if not schedule:
-        print("Schedule not found. Will look again.\n")
+        print("No event matches a schedule. Will look again.\n")
         time.sleep(5)
         main()
     print("\nSetting today's schedule to ", schedule)
